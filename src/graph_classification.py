@@ -17,7 +17,7 @@ def graph_classifier(root_dataset: str,
                      graph_kernel: str,
                      size_splits: List[float],
                      seed: int,
-                     C: float,
+                     Cs: List[float],
                      folder_results: str,
                      save_predictions: bool,
                      verbose: bool,
@@ -29,7 +29,7 @@ def graph_classifier(root_dataset: str,
         graph_kernel:
         size_splits:
         seed:
-        C:
+        Cs:
         folder_results:
         save_predictions:
         verbose:
@@ -83,7 +83,7 @@ def graph_classifier(root_dataset: str,
     #
     # out = cross_validate_Kfold_SVM([Ks], classes, n_iter=1)
     # print(out)
-    Cs = (10. ** np.arange(-1, 6, 0.5) / len(G_train)).tolist()
+    # Cs = (10. ** np.arange(-1, 6, 0.5) / len(G_train)).tolist()
 
     KERNELS = {
         'WL': WeisfeilerLehman(n_iter=5,

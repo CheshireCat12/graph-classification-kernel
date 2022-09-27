@@ -1,18 +1,16 @@
-from typing import List
-from time import time
-from src.utils import Logger
-import networkx as nx
-from collections import namedtuple
-
-from grakel import GraphKernel
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
 import csv
-import numpy as np
-import pandas as pd
 import logging
 import os
+from collections import namedtuple
+from time import time
+from typing import List
+
+import numpy as np
+from grakel import GraphKernel
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+
+from src.utils import Logger
 
 AccuracyTracker = namedtuple('AccuracyTracker',
                              ['acc', 'best_c'])
@@ -41,36 +39,10 @@ def train(logger: Logger,
     K_train = kernel.fit_transform(G_train)
 
     clf = GridSearchCV(svc, {'C': Cs})
-
     clf.fit(K_train, y_train)
 
-    # results_df = pd.DataFrame(clf.cv_results_)
-    # results_df = results_df.sort_values(by=["rank_test_score"])
-    # results_df = results_df.set_index(
-    #     results_df["params"].apply(lambda x: "_".join(str(val) for val in x.values()))
-    # ).rename_axis("kernel")
-    # print(results_df[["params", "rank_test_score", "mean_test_score", "std_test_score"]])
-    # # print(clf.cv_results_.items())
-    # print(clf.best_params_)
-    # print(clf.best_score_)
-
-    acc_tracker = AccuracyTracker(clf.best_score_, clf.best_params_['C'])
-
-    # clf = SVC(kernel='precomputed', **clf.best_params_)
-    #
-    # start_time = time()
-    # K_train = kernel.fit_transform(G_train)
-    # K_val = kernel.transform(G_val)
-    #
-    #
-    # clf.fit(K_train, y_train)
-    #
-    # y_pred = clf.predict(K_val)
-    # end_time = time()
-    #
-    # acc = accuracy_score(y_val, y_pred)
-    # print(f'Accuracy: {acc}, Time: {end_time - start_time}')
-    #
+    acc_tracker = AccuracyTracker(clf.best_score_,
+                                  clf.best_params_['C'])
 
     # Save all the hyperparameters tested
     logger.data['hyperparameters_tuning'] = {'Cs': Cs}
@@ -113,7 +85,6 @@ def write_predictions(filename: str,
             writer.writerow({'predictions': pred, 'GT_labels': GT_lbl})
 
 
-
 def evaluate(logger: Logger,
              acc_tracker: AccuracyTracker,
              kernel: GraphKernel,
@@ -128,13 +99,12 @@ def evaluate(logger: Logger,
     Args:
         logger:
         acc_tracker:
-        X_train:
-        X_test:
+        kernel:
+        G_train:
+        G_test:
         y_train:
         y_test:
-        n_cores:
         folder_results:
-        save_distances:
         save_predictions:
 
     Returns:
