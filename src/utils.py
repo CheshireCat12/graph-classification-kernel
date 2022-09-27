@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
+from tqdm import tqdm
 
 def set_global_verbose(verbose: bool = False) -> None:
     """
@@ -38,11 +38,15 @@ def load_graphs(root_dataset: str,
                 file_classes: str = 'graph_classes.csv') -> Tuple[List[nx.Graph], np.ndarray]:
     graph_files = glob(os.path.join(root_dataset, file_extension))
 
-    nx_graphs = [nx.read_graphml(file) for file in graph_files]
-    for nx_graph in nx_graphs:
+    nx_graphs = []
+    for file in tqdm(graph_files, desc='Load Graphs'):
+        nx_graph = nx.read_graphml(file)
+
         for idx_node, data_node in nx_graph.nodes(data=True):
             np_data = np.fromstring(data_node[node_attr][1:-1], sep=' ')
             nx_graph.nodes[idx_node][node_attr] = np_data
+
+        nx_graphs.append(nx_graph)
 
     classes = None
     if load_classes:

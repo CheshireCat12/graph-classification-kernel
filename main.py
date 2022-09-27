@@ -1,23 +1,4 @@
-import os
-from glob import glob
-
-import networkx as nx
-import numpy as np
-from grakel.utils import graph_from_networkx
-import json
-from grakel.kernels import RandomWalk
-
 import argparse
-import csv
-import logging
-import os
-import pathlib
-from collections import namedtuple
-from itertools import product
-from time import time
-from typing import List, Tuple
-
-import numpy as np
 
 from src.graph_classification import graph_classifier
 
@@ -32,24 +13,6 @@ def main(args):
                      args.save_predictions,
                      args.verbose,
                      args)
-    # path = './data/NCI1'
-    # files = glob(os.path.join(path, '*.graphml'))
-    # attr_node = 'x'
-    #
-    # nx_graphs = [nx.read_graphml(file) for file in files]
-    # for nx_graph in nx_graphs:
-    #     for idx_node, data_node in nx_graph.nodes(data=True):
-    #         np_data = np.fromstring(data_node[attr_node][1:-1], sep=' ')
-    #         nx_graph.nodes[idx_node][attr_node] = np_data
-    #
-    # grakel_graphs = graph_from_networkx(nx_graphs)
-    # print(len(nx_graphs))
-    # print(nx_graphs[0].nodes(data=True))
-    # print(grakel_graphs)
-    # pass
-    #
-    # kernel = RandomWalk().fit_transform(grakel_graphs)
-    # print(kernel)
 
 
 if __name__ == '__main__':
@@ -65,7 +28,7 @@ if __name__ == '__main__':
     # Hyperparameters for the Graph kernel
     args_parser.add_argument('--graph_kernel',
                              default='WL',
-                             choices=['WL'],
+                             choices=['WL', 'SP'],
                              type=str,
                              help='Graph kernel to embed the graphs')
 
@@ -74,7 +37,7 @@ if __name__ == '__main__':
                              nargs='*',
                              default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
                              type=float,
-                             help='List of alphas to test')
+                             help='List of Cs to test')
 
     # Parameters used during the optimization process
     args_parser.add_argument('--size_splits',
