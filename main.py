@@ -12,6 +12,7 @@ def main(args):
                      args.seed,
                      args.Cs,
                      args.n_cores,
+                     args.save_gt_labels,
                      args.save_predictions,
                      args.folder_results,
                      args.verbose,
@@ -59,6 +60,9 @@ if __name__ == '__main__':
                              type=int,
                              help='Set the number of cores to use.')
 
+    args_parser.add_argument('--save_gt_labels',
+                             action='store_true',
+                             help='save the ground truth classes if activated')
     args_parser.add_argument('--save_predictions',
                              action='store_true',
                              help='save the predicted classes if activated')

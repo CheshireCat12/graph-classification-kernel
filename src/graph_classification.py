@@ -44,6 +44,7 @@ def graph_classifier(root_dataset: str,
                      seed: int,
                      Cs: List[float],
                      n_cores: int,
+                     save_gt_labels: bool,
                      save_predictions: bool,
                      folder_results: str,
                      verbose: bool,
@@ -57,6 +58,7 @@ def graph_classifier(root_dataset: str,
         seed:
         Cs:
         n_cores:
+        save_gt_labels:
         save_predictions:
         folder_results:
         verbose:
@@ -105,4 +107,5 @@ def graph_classifier(root_dataset: str,
              G_train, G_test,
              y_train, y_test,
              folder_results,
+             save_gt_labels,
              save_predictions)

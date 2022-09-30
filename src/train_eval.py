@@ -1,4 +1,3 @@
-import csv
 import logging
 import os
 from collections import namedtuple
@@ -10,7 +9,7 @@ from grakel import GraphKernel
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 
-from src.utils import Logger
+from src.utils import Logger, write_GT_labels, write_predictions
 
 AccuracyTracker = namedtuple('AccuracyTracker',
                              ['acc', 'best_c'])
@@ -61,32 +60,6 @@ def train(logger: Logger,
     return acc_tracker
 
 
-def write_predictions(filename: str,
-                      predictions: List[int],
-                      GT_labels: List[int]) -> None:
-    """
-    Write the predictions and the corresponding GT labels in `filename`.
-
-    Args:
-        filename: File where to save the predictions.
-        predictions: Iterable of predictions
-        GT_labels: Iterable of the GT labels
-
-    Returns:
-
-    """
-
-    with open(filename, 'w') as csv_file:
-        fieldnames = ['predictions', 'GT_labels']
-
-        writer = csv.DictWriter(csv_file,
-                                fieldnames=fieldnames)
-
-        writer.writeheader()
-        for pred, GT_lbl in zip(predictions, GT_labels):
-            writer.writerow({'predictions': pred, 'GT_labels': GT_lbl})
-
-
 def evaluate(logger: Logger,
              acc_tracker: AccuracyTracker,
              kernel: GraphKernel,
@@ -95,6 +68,7 @@ def evaluate(logger: Logger,
              y_train: List[int],
              y_test: List[int],
              folder_results: str,
+             save_gt_labels: bool,
              save_predictions: bool) -> None:
     """
 
@@ -107,6 +81,7 @@ def evaluate(logger: Logger,
         y_train:
         y_test:
         folder_results:
+        save_gt_labels:
         save_predictions:
 
     Returns:
@@ -137,6 +112,11 @@ def evaluate(logger: Logger,
 
     logging.info(f'Classification accuracy (test) {current_acc: .2f} '
                  f'(alpha: {acc_tracker.best_c})')
+
+    if save_gt_labels:
+        file_gt_labels = os.path.join(folder_results,
+                                      'gt_labels.csv')
+        write_GT_labels(file_gt_labels, list(y_train) + list(y_test))
 
     if save_predictions:
         file_predictions = os.path.join(folder_results,
