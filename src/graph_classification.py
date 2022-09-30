@@ -2,7 +2,7 @@ import os
 import pathlib
 from typing import List
 
-import numpy as np
+import networkx as nx
 from grakel.kernels import WeisfeilerLehman, VertexHistogram, ShortestPath
 from grakel.utils import graph_from_networkx
 from sklearn.model_selection import train_test_split
@@ -10,7 +10,32 @@ from sklearn.model_selection import train_test_split
 from src.train_eval import train, evaluate
 from src.utils import set_global_verbose, Logger, load_graphs
 
-LOGGER_FILE = 'results_general_GK'
+LOGGER_FILE = 'results_general_GK.json'
+
+KERNELS = {
+    'WL': WeisfeilerLehman(n_iter=5,
+                           normalize=True,
+                           base_graph_kernel=VertexHistogram),
+    'SP': ShortestPath()
+}
+
+
+def make_hashable_attr(nx_graphs: List[nx.Graph],
+                       node_attr: str = 'x') -> None:
+    """
+    Transform the node attribute `x` to str to be hashable.
+
+    Args:
+        nx_graphs:
+        node_attr:
+
+    Returns:
+
+    """
+    for nx_graph in nx_graphs:
+        for idx_node, data_node in nx_graph.nodes(data=True):
+            str_data = str(data_node[node_attr])
+            nx_graph.nodes[idx_node][node_attr] = str_data
 
 
 def graph_classifier(root_dataset: str,
@@ -18,8 +43,9 @@ def graph_classifier(root_dataset: str,
                      size_splits: List[float],
                      seed: int,
                      Cs: List[float],
-                     folder_results: str,
+                     n_cores: int,
                      save_predictions: bool,
+                     folder_results: str,
                      verbose: bool,
                      args):
     """
@@ -30,8 +56,9 @@ def graph_classifier(root_dataset: str,
         size_splits:
         seed:
         Cs:
-        folder_results:
+        n_cores:
         save_predictions:
+        folder_results:
         verbose:
         args:
 
@@ -44,7 +71,7 @@ def graph_classifier(root_dataset: str,
 
     # Init logger
     logger_filename = os.path.join(folder_results,
-                                   'results_general.json')
+                                   LOGGER_FILE)
     logger = Logger(logger_filename)
 
     # Save all the input parameters
@@ -53,13 +80,7 @@ def graph_classifier(root_dataset: str,
 
     nx_graphs, classes = load_graphs(root_dataset,
                                      load_classes=True)
-
-    node_attr = 'x'
-    for nx_graph in nx_graphs:
-        for idx_node, data_node in nx_graph.nodes(data=True):
-            str_data = str(data_node[node_attr])
-            nx_graph.nodes[idx_node][node_attr] = str_data
-
+    make_hashable_attr(nx_graphs, node_attr='x')
     grakel_graphs = [graph for graph in graph_from_networkx(nx_graphs,
                                                             node_labels_tag='x',
                                                             as_Graph=True)]
@@ -69,34 +90,14 @@ def graph_classifier(root_dataset: str,
                                                         classes,
                                                         test_size=size_test,
                                                         random_state=seed)
-    # G_train, G_val, G_test, y_train, y_val, y_test = train_val_test_split(grakel_graphs,
-    #                                                                       classes,
-    #                                                                       val_size=size_val,
-    #                                                                       test_size=size_test,
-    #                                                                       random_state=seed)
-    # Ks = []
-    # for i in range(2, 7):
-    #     gk = WeisfeilerLehman(n_iter=i,
-    #                           base_graph_kernel=VertexHistogram)
-    #     K = gk.fit_transform(grakel_graphs)
-    #     Ks.append(K)
-    #
-    # out = cross_validate_Kfold_SVM([Ks], classes, n_iter=1)
-    # print(out)
-    # Cs = (10. ** np.arange(-1, 6, 0.5) / len(G_train)).tolist()
-
-    KERNELS = {
-        'WL': WeisfeilerLehman(n_iter=5,
-                               normalize=True,
-                               base_graph_kernel=VertexHistogram),
-        'SP': ShortestPath()
-    }
 
     kernel = KERNELS[graph_kernel]
+    # kernel.n_jobs = n_cores if n_cores > 0 else None
     acc_tracker = train(logger,
                         kernel,
                         Cs,
-                        G_train, y_train)
+                        G_train, y_train,
+                        n_cores)
 
     evaluate(logger,
              acc_tracker,

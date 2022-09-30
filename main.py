@@ -11,8 +11,9 @@ def main(args):
                      args.size_splits,
                      args.seed,
                      args.Cs,
-                     args.folder_results,
+                     args.n_cores,
                      args.save_predictions,
+                     args.folder_results,
                      args.verbose,
                      args)
 
@@ -52,6 +53,11 @@ if __name__ == '__main__':
                              default=1,
                              type=int,
                              help='Choose the random seed')
+
+    args_parser.add_argument('--n_cores',
+                             default=1,
+                             type=int,
+                             help='Set the number of cores to use.')
 
     args_parser.add_argument('--save_predictions',
                              action='store_true',

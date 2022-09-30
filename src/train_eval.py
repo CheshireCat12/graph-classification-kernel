@@ -20,7 +20,8 @@ def train(logger: Logger,
           kernel: GraphKernel,
           Cs: List[float],
           G_train: List,
-          y_train: List[int]) -> AccuracyTracker:
+          y_train: List[int],
+          n_cores: int) -> AccuracyTracker:
     """
 
     Args:
@@ -29,6 +30,7 @@ def train(logger: Logger,
         Cs:
         G_train:
         y_train:
+        n_cores:
 
     Returns:
 
@@ -38,7 +40,9 @@ def train(logger: Logger,
 
     K_train = kernel.fit_transform(G_train)
 
-    clf = GridSearchCV(svc, {'C': Cs})
+    clf = GridSearchCV(svc, {'C': Cs[::-1]},
+                       n_jobs=n_cores,
+                       verbose=3)
     clf.fit(K_train, y_train)
 
     acc_tracker = AccuracyTracker(clf.best_score_,
@@ -46,8 +50,6 @@ def train(logger: Logger,
 
     # Save all the hyperparameters tested
     logger.data['hyperparameters_tuning'] = {'Cs': Cs}
-    # logger.data['val_accuracies'] = []  # List of tuple (acc, alpha, k)
-    # logger.data['val_prediction_times'] = []
 
     logging.info(f'Best val classification accuracy {100 * acc_tracker.acc: .2f}% '
                  f'(C: {acc_tracker.best_c})')
