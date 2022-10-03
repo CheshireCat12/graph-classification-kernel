@@ -14,7 +14,6 @@ LOGGER_FILE = 'results_general_GK.json'
 
 KERNELS = {
     'WL': WeisfeilerLehman(n_iter=5,
-                           normalize=True,
                            base_graph_kernel=VertexHistogram),
     'SP': ShortestPath()
 }
@@ -99,7 +98,8 @@ def graph_classifier(root_dataset: str,
                         kernel,
                         Cs,
                         G_train, y_train,
-                        n_cores)
+                        n_cores,
+                        verbose=verbose)
 
     evaluate(logger,
              acc_tracker,

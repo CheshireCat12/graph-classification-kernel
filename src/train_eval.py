@@ -8,6 +8,7 @@ import numpy as np
 from grakel import GraphKernel
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
+import pandas as pd
 
 from src.utils import Logger, write_GT_labels, write_predictions
 
@@ -20,7 +21,8 @@ def train(logger: Logger,
           Cs: List[float],
           G_train: List,
           y_train: List[int],
-          n_cores: int) -> AccuracyTracker:
+          n_cores: int,
+          verbose: bool=False) -> AccuracyTracker:
     """
 
     Args:
@@ -30,6 +32,7 @@ def train(logger: Logger,
         G_train:
         y_train:
         n_cores:
+        verbose:
 
     Returns:
 
@@ -41,14 +44,14 @@ def train(logger: Logger,
 
     clf = GridSearchCV(svc, {'C': Cs[::-1]},
                        n_jobs=n_cores,
-                       verbose=3)
+                       verbose=int(verbose)*3)
     clf.fit(K_train, y_train)
 
     acc_tracker = AccuracyTracker(clf.best_score_,
                                   clf.best_params_['C'])
 
     # Save all the hyperparameters tested
-    logger.data['hyperparameters_tuning'] = {'Cs': Cs}
+    logger.data['hyperparameters_tuning'] = pd.DataFrame(clf.cv_results_).to_json()
 
     logging.info(f'Best val classification accuracy {100 * acc_tracker.acc: .2f}% '
                  f'(C: {acc_tracker.best_c})')
@@ -111,7 +114,7 @@ def evaluate(logger: Logger,
     logger.save_data()
 
     logging.info(f'Classification accuracy (test) {current_acc: .2f} '
-                 f'(alpha: {acc_tracker.best_c})')
+                 f'(C: {acc_tracker.best_c})')
 
     if save_gt_labels:
         file_gt_labels = os.path.join(folder_results,
