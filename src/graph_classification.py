@@ -86,20 +86,16 @@ def graph_classifier(root_dataset: str,
     grakel_graphs = [graph for graph in graph_from_networkx(nx_graphs,
                                                             node_labels_tag='x',
                                                             as_Graph=True)]
-    logging.info(len(grakel_graphs))
-    size_train, size_val, size_test = size_splits
-    # G_train, G_test, y_train, y_test = train_test_split(grakel_graphs,
-    #                                                     classes,
-    #                                                     test_size=size_test,
-    #                                                     random_state=seed)
 
-    G_train, G_test, y_train, y_test = grakel_graphs[:3469], grakel_graphs[3469:], classes[:3469], classes[3469:]
-    logging.info(len(G_train))
+    size_train, size_val, size_test = size_splits
+    G_train, G_test, y_train, y_test = train_test_split(grakel_graphs,
+                                                        classes,
+                                                        test_size=size_test,
+                                                        random_state=seed)
+
     logging.info(G_train[0].vertices)
-    logging.info(G_train[0].node_labels)
+
     kernel = KERNELS[graph_kernel]
-    logging.info(kernel)
-    # kernel.n_jobs = n_cores if n_cores > 0 else None
     acc_tracker = train(logger,
                         kernel,
                         Cs,

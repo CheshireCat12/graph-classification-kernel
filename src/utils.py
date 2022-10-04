@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 from glob import glob
 from typing import List, Iterable, Tuple
 
@@ -39,16 +40,23 @@ def load_graphs(root_dataset: str,
                 load_classes: bool = False,
                 file_classes: str = 'graph_classes.csv') -> Tuple[List[nx.Graph], np.ndarray]:
     graph_files = glob(os.path.join(root_dataset, file_extension))
-    print(graph_files)
-    nx_graphs = []
+
+    nx_graphs = [None] * len(graph_files)
+
     for file in tqdm(graph_files, desc='Load Graphs'):
+
+        # The idx of the graph is retrieved from its filename
+        filename = file.split('/')[-1]
+        idx_graph = int(re.findall('[0-9]+', filename)[0])
+
         nx_graph = nx.read_graphml(file)
 
         for idx_node, data_node in nx_graph.nodes(data=True):
             np_data = np.fromstring(data_node[node_attr][1:-1], sep=' ')
             nx_graph.nodes[idx_node][node_attr] = np_data
 
-        nx_graphs.append(nx_graph)
+        nx_graphs[idx_graph] = nx_graph
+        # nx_graphs.append(nx_graph)
 
     classes = None
     if load_classes:
