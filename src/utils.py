@@ -39,7 +39,7 @@ def load_graphs(root_dataset: str,
                 load_classes: bool = False,
                 file_classes: str = 'graph_classes.csv') -> Tuple[List[nx.Graph], np.ndarray]:
     graph_files = glob(os.path.join(root_dataset, file_extension))
-
+    print(graph_files)
     nx_graphs = []
     for file in tqdm(graph_files, desc='Load Graphs'):
         nx_graph = nx.read_graphml(file)
