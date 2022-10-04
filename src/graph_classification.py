@@ -88,10 +88,12 @@ def graph_classifier(root_dataset: str,
                                                             as_Graph=True)]
     logging.info(len(grakel_graphs))
     size_train, size_val, size_test = size_splits
-    G_train, G_test, y_train, y_test = train_test_split(grakel_graphs,
-                                                        classes,
-                                                        test_size=size_test,
-                                                        random_state=seed)
+    # G_train, G_test, y_train, y_test = train_test_split(grakel_graphs,
+    #                                                     classes,
+    #                                                     test_size=size_test,
+    #                                                     random_state=seed)
+
+    G_train, G_test, y_train, y_test = grakel_graphs[:3469], grakel_graphs[3469:], classes[:3469], classes[3469:]
     logging.info(len(G_train))
     logging.info(G_train[0].vertices)
     logging.info(G_train[0].node_labels)
