@@ -93,8 +93,6 @@ def graph_classifier(root_dataset: str,
                                                         test_size=size_test,
                                                         random_state=seed)
 
-    logging.info(G_train[0].vertices)
-
     kernel = KERNELS[graph_kernel]
     acc_tracker = train(logger,
                         kernel,
